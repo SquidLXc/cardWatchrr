@@ -10,11 +10,31 @@
     "ios": {
       "supportsTablet": false
     },
-    "android": {},
+    "android": {
+      "package": "com.cardwatchrr.cardwatch",
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/images/cardwatch-icon.png",
+        "backgroundColor": "#090B0D"
+      },
+      "permissions": [
+        "android.permission.READ_MEDIA_IMAGES",
+        "android.permission.READ_EXTERNAL_STORAGE"
+      ]
+    },
     "web": {
       "favicon": "./assets/images/icon.png"
     },
-    "plugins": ["expo-router"],
+    "plugins": [
+      "expo-router",
+      [
+        "expo-media-library",
+        {
+          "photosPermission": "CardWatch reads your gallery to detect Pokemon cards from screenshots.",
+          "savePhotosPermission": "CardWatch does not save photos.",
+          "isAccessMediaLocationEnabled": true
+        }
+      ]
+    ],
     "experiments": {
       "typedRoutes": true,
       "reactCompiler": true

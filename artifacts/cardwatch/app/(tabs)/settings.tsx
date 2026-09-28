@@ -9,6 +9,7 @@ import { useTestDiscord } from '@workspace/api-client-react';
 
 const confidenceOptions = [75, 85, 92];
 const intervalOptions = [2, 3, 5];
+const cooldownOptions = [5, 10, 30, 60];
 
 function OptionGroup({
   label,
@@ -117,6 +118,8 @@ export default function SettingsScreen() {
           <OptionGroup label="MINIMUM CONFIDENCE" values={confidenceOptions} selected={settings.minimumConfidence} suffix="%" onSelect={(value) => updateSettings({ minimumConfidence: value })} />
           <View style={[styles.divider, { backgroundColor: colors.border }]} />
           <OptionGroup label="SCAN INTERVAL" values={intervalOptions} selected={settings.scanInterval} suffix=" sec" onSelect={(value) => updateSettings({ scanInterval: value })} />
+          <View style={[styles.divider, { backgroundColor: colors.border }]} />
+          <OptionGroup label="DUPLICATE COOLDOWN" values={cooldownOptions} selected={settings.duplicateCooldown} suffix=" sec" onSelect={(value) => updateSettings({ duplicateCooldown: value })} />
         </View>
 
         <Text style={[styles.sectionLabel, { color: colors.mutedForeground, marginTop: 25 }]}>CONNECTION</Text>

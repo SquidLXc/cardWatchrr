@@ -1,4 +1,5 @@
 import { Feather, MaterialCommunityIcons } from '@expo/vector-icons';
+import { Image } from 'expo-image';
 import React from 'react';
 import { Alert, FlatList, Pressable, StyleSheet, Text, View } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
@@ -60,7 +61,16 @@ export default function HistoryScreen() {
         renderItem={({ item }) => (
           <View style={[styles.detectionRow, { backgroundColor: colors.card, borderColor: colors.border }]}>
             <View style={[styles.cardThumb, { backgroundColor: colors.secondary }]}>
-              <MaterialCommunityIcons name="cards-outline" size={22} color={colors.mutedForeground} />
+              {item.imageUrl ? (
+                <Image
+                  source={{ uri: item.imageUrl }}
+                  style={styles.cardThumbImage}
+                  contentFit="contain"
+                  accessibilityLabel={item.cardName}
+                />
+              ) : (
+                <MaterialCommunityIcons name="cards-outline" size={22} color={colors.mutedForeground} />
+              )}
             </View>
             <View style={styles.detectionCopy}>
               <Text style={[styles.cardName, { color: colors.foreground }]}>{item.cardName}</Text>
@@ -68,7 +78,7 @@ export default function HistoryScreen() {
             </View>
             <View style={styles.detectionRight}>
               <Text style={[styles.price, { color: colors.primary }]}>
-                {item.detectedPrice ? `$${item.detectedPrice.toFixed(2)}` : '—'}
+                {(item.rawPrice ?? item.detectedPrice) != null ? `$${(item.rawPrice ?? item.detectedPrice)!.toFixed(2)}` : '—'}
               </Text>
               <Text style={[styles.time, { color: colors.mutedForeground }]}>
                 {new Date(item.detectedAt).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' })}
@@ -96,7 +106,8 @@ const styles = StyleSheet.create({
   emptyMetaRow: { flexDirection: 'row', alignItems: 'center', gap: 7 },
   emptyMeta: { fontFamily: 'Inter_500Medium', fontSize: 11 },
   detectionRow: { flexDirection: 'row', alignItems: 'center', borderWidth: 1, borderRadius: 18, padding: 12, marginBottom: 10 },
-  cardThumb: { width: 52, height: 66, borderRadius: 11, alignItems: 'center', justifyContent: 'center', marginRight: 12 },
+  cardThumb: { width: 52, height: 66, borderRadius: 11, alignItems: 'center', justifyContent: 'center', marginRight: 12, overflow: 'hidden' },
+  cardThumbImage: { width: '100%', height: '100%' },
   detectionCopy: { flex: 1 },
   cardName: { fontFamily: 'Inter_600SemiBold', fontSize: 14, marginBottom: 5 },
   cardSet: { fontFamily: 'Inter_400Regular', fontSize: 11 },
