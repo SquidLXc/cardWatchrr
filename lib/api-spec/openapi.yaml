@@ -1,0 +1,331 @@
+openapi: 3.1.0
+info:
+  # Do not change the title, if the title changes, the import paths will be broken
+  title: Api
+  version: 0.1.0
+  description: API specification
+servers:
+  - url: /api
+    description: Base API path
+tags:
+  - name: health
+    description: Health operations
+  - name: detections
+    description: Card detection and history operations
+  - name: cards
+    description: Card lookup operations
+  - name: prices
+    description: Card pricing operations
+  - name: settings
+    description: Scanner settings operations
+  - name: discord
+    description: Discord notification operations
+paths:
+  /healthz:
+    get:
+      operationId: healthCheck
+      tags: [health]
+      summary: Health check
+      description: Returns server health status
+      responses:
+        "200":
+          description: Healthy
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HealthStatus"
+  /detections:
+    get:
+      operationId: listDetections
+      tags: [detections]
+      summary: List saved detections
+      responses:
+        "200":
+          description: Saved detections
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Detection"
+    post:
+      operationId: createDetection
+      tags: [detections]
+      summary: Save a confirmed detection
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/DetectionInput"
+      responses:
+        "201":
+          description: Saved detection
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Detection"
+        "400":
+          description: Invalid detection
+  /detect:
+    post:
+      operationId: analyzeCandidate
+      tags: [detections]
+      summary: Analyze a locally detected card candidate
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CandidateInput"
+      responses:
+        "200":
+          description: Candidate analysis
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CandidateAnalysis"
+  /identify:
+    post:
+      operationId: identifyCard
+      tags: [cards]
+      summary: Identify a card from OCR metadata
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/IdentifyInput"
+      responses:
+        "200":
+          description: Identification result
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Identification"
+  /cards/{id}:
+    get:
+      operationId: getCard
+      tags: [cards]
+      summary: Get a card by ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Card
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Card"
+        "404":
+          description: Card not found
+  /prices/{id}:
+    get:
+      operationId: getPrice
+      tags: [prices]
+      summary: Get the latest price for a card
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Price result
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Price"
+  /settings:
+    get:
+      operationId: getSettings
+      tags: [settings]
+      summary: Get scanner settings
+      responses:
+        "200":
+          description: Scanner settings
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Settings"
+    put:
+      operationId: updateSettings
+      tags: [settings]
+      summary: Update scanner settings
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SettingsInput"
+      responses:
+        "200":
+          description: Updated scanner settings
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Settings"
+  /discord/test:
+    post:
+      operationId: testDiscord
+      tags: [discord]
+      summary: Send a test Discord notification
+      responses:
+        "200":
+          description: Discord test result
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DiscordTestResult"
+components:
+  schemas:
+    HealthStatus:
+      type: object
+      properties:
+        status:
+          type: string
+      required:
+        - status
+    BoundingBox:
+      type: object
+      properties:
+        left: { type: number }
+        top: { type: number }
+        width: { type: number }
+        height: { type: number }
+      required: [left, top, width, height]
+    Card:
+      type: object
+      properties:
+        id: { type: string }
+        name: { type: string }
+        setName: { type: string }
+        number: { type: string }
+        imageUrl: { type: string, nullable: true }
+      required: [id, name, setName, number]
+    Price:
+      type: object
+      properties:
+        cardId: { type: string }
+        raw: { type: number, nullable: true }
+        psa9: { type: number, nullable: true }
+        psa10: { type: number, nullable: true }
+        recentSales:
+          type: array
+          items: { type: number }
+        currency: { type: string }
+        source: { type: string }
+        available: { type: boolean }
+        updatedAt: { type: string, format: date-time, nullable: true }
+      required: [cardId, recentSales, currency, source, available]
+    Detection:
+      type: object
+      properties:
+        id: { type: string }
+        cardId: { type: string, nullable: true }
+        cardName: { type: string }
+        setName: { type: string }
+        cardNumber: { type: string }
+        imageUrl: { type: string, nullable: true }
+        detectedPrice: { type: number, nullable: true }
+        rawPrice: { type: number, nullable: true }
+        psa9Price: { type: number, nullable: true }
+        psa10Price: { type: number, nullable: true }
+        confidence: { type: number }
+        detectedAt: { type: string, format: date-time }
+        source: { type: string }
+        duplicate: { type: boolean }
+      required: [id, cardName, setName, cardNumber, confidence, detectedAt, source, duplicate]
+    DetectionInput:
+      type: object
+      properties:
+        cardId: { type: string, nullable: true }
+        cardName: { type: string }
+        setName: { type: string }
+        cardNumber: { type: string }
+        imageUrl: { type: string, nullable: true }
+        detectedPrice: { type: number, nullable: true }
+        rawPrice: { type: number, nullable: true }
+        psa9Price: { type: number, nullable: true }
+        psa10Price: { type: number, nullable: true }
+        confidence: { type: number, minimum: 0, maximum: 1 }
+        detectedAt: { type: string, format: date-time, nullable: true }
+        source: { type: string }
+      required: [cardName, setName, cardNumber, confidence, source]
+    CandidateInput:
+      type: object
+      properties:
+        confidence: { type: number, minimum: 0, maximum: 1 }
+        boundingBox:
+          $ref: "#/components/schemas/BoundingBox"
+        cardName: { type: string, nullable: true }
+        setName: { type: string, nullable: true }
+        cardNumber: { type: string, nullable: true }
+        imageBase64: { type: string, nullable: true }
+      required: [confidence, boundingBox]
+    CandidateAnalysis:
+      type: object
+      properties:
+        detected: { type: boolean }
+        confidence: { type: number }
+        boundingBox:
+          $ref: "#/components/schemas/BoundingBox"
+        identification:
+          allOf:
+            - $ref: "#/components/schemas/Identification"
+          nullable: true
+        reason: { type: string }
+      required: [detected, confidence, boundingBox, reason]
+    IdentifyInput:
+      type: object
+      properties:
+        cardName: { type: string, nullable: true }
+        setName: { type: string, nullable: true }
+        cardNumber: { type: string, nullable: true }
+        imageBase64: { type: string, nullable: true }
+      required: []
+    Identification:
+      type: object
+      properties:
+        identified: { type: boolean }
+        confidence: { type: number }
+        card:
+          allOf:
+            - $ref: "#/components/schemas/Card"
+          nullable: true
+        price:
+          allOf:
+            - $ref: "#/components/schemas/Price"
+          nullable: true
+        reason: { type: string }
+      required: [identified, confidence, reason]
+    Settings:
+      type: object
+      properties:
+        discordEnabled: { type: boolean }
+        minimumConfidence: { type: integer, minimum: 0, maximum: 100 }
+        scanInterval: { type: integer, minimum: 1, maximum: 60 }
+        duplicateCooldown: { type: integer, minimum: 1, maximum: 3600 }
+        backendUrl: { type: string }
+      required: [discordEnabled, minimumConfidence, scanInterval, duplicateCooldown, backendUrl]
+    SettingsInput:
+      type: object
+      properties:
+        discordEnabled: { type: boolean }
+        minimumConfidence: { type: integer, minimum: 0, maximum: 100 }
+        scanInterval: { type: integer, minimum: 1, maximum: 60 }
+        duplicateCooldown: { type: integer, minimum: 1, maximum: 3600 }
+        backendUrl: { type: string }
+      required: []
+    DiscordTestResult:
+      type: object
+      properties:
+        sent: { type: boolean }
+        message: { type: string }
+      required: [sent, message]
+
