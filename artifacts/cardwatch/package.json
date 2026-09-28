@@ -54,12 +54,7 @@
     "react-native-worklets": "0.10.1",
     "typescript": "~6.0.3",
     "zod": "catalog:",
-    "zod-validation-error": "^3.4.0"
-  },
-  "dependencies": {
-    "@react-native/metro-config": "0.86.3",
-    "expo": "~57.0.25",
-    "react": "19.2.3",
-    "react-native": "0.86.3"
+    "zod-validation-error": "^3.4.0",
+    "@react-native/metro-config": "0.86.3"
   }
 }
