@@ -1,0 +1,24 @@
+kind = "mobile"
+previewPath = "/"
+title = "CardWatch"
+description = "An Android-first Pokémon card scanning companion that lets users start a screen-capture session, review the current detected card, browse detection history, and configure notification and scanning preferences."
+version = "1.0.0"
+id = "artifacts/cardwatch"
+router = "expo-domain"
+
+[[services]]
+name = "expo"
+ensurePreviewReachable = "/status"
+paths = [ "/" ]
+localPort = 24619
+
+[services.development]
+run = "pnpm --filter @workspace/cardwatch run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/cardwatch", "run", "build" ]
+run = [ "pnpm", "--filter", "@workspace/cardwatch", "run", "serve" ]
+
+[services.env]
+PORT = "24619"
+BASE_PATH = "/"
